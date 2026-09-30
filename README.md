@@ -22,3 +22,30 @@ Geração de logs
 Ranking das extensões mais encontradas
 Identificação de extensões presentes em apenas uma estação
 Dashboard HTML com pesquisa
+
+Arquitetura
+Active Directory
+       │
+       ▼
+      GPO
+       │
+       ▼
+Estações Windows
+       │
+       │ PowerShell
+       ▼
+Chrome User Data
+       │
+       │ JSON
+       ▼
+File Server
+       │
+       ▼
+Consolidação
+       │
+       ├── JSON
+       ├── CSV
+       └── Logs
+       │
+       ▼
+Dashboard HTML
