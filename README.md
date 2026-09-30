@@ -8,6 +8,8 @@ O projeto utiliza PowerShell · Active Directory · GPO · JSON · HTML/CSS/JS
 Extensões não autorizadas representam risco real de segurança (roubo de dados,
 injeção de scripts, cryptojacking).
 
+Coleta via GPO → consolidação central → dashboard HTML interativo.
+
 ## Principais recursos
 Coleta automática das extensões do Chrome
 Suporte a múltiplos usuários e perfis do Chrome
