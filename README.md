@@ -4,9 +4,8 @@ Solução em PowerShell para inventário centralizado das extensões instaladas 
 
 O projeto utiliza PowerShell · Active Directory · GPO · JSON · HTML/CSS/JS
 
-🎯 Auditar extensões instaladas manualmente em centenas de máquinas é inviável.
-Extensões não autorizadas representam risco real de segurança (roubo de dados,
-injeção de scripts, cryptojacking).
+🎯 Auditar extensões instaladas manualmente em centenas de máquinas é inviável. Extensões não autorizadas representam risco real de segurança (roubo de dados,injeção de scripts, cryptojacking).
+Antes de bloquear as extensões via GPO com ADM/ADMX é importante o que tem de extensão nos ativos, pode ter alguma importante.
 
 Coleta via GPO → consolidação central → dashboard HTML interativo.
 
@@ -44,16 +43,43 @@ Cada estação gera seu próprio arquivo JSON em um compartilhamento de rede.
 
 Exemplo:
 
-\fileserver\Extensoes\PC-001.json \fileserver\Extensoes\PC-002.json \fileserver\Extensoes\PC-003.json 3. Consolidação
+\fileserver\Extensoes\PC-001.json
+\fileserver\Extensoes\PC-002.json
+
+3. Consolidação
 
 O script de consolidação lê os inventários individuais e gera:
 
-dados_consolidados.json relatorio_completo.csv consolidacao_log.txt
+dados_consolidados.json 
+relatorio_completo.csv 
+consolidacao_log.txt
 
 Também apresenta estatísticas da coleta, como:
 
-Máquinas processadas Usuários encontrados Extensões únicas Total de registros Arquivos processados Arquivos com erro 4. Dashboard
+Máquinas processadas
+Usuários encontrados
+Extensões únicas
+Total de registros
+Arquivos processados
+Arquivos com erro
+
+4. Dashboard
 
 Os dados consolidados são utilizados para gerar um dashboard HTML contendo:
 
-Total de máquinas Total de usuários Total de extensões Total de instalações Pesquisa por computador Pesquisa por usuário Pesquisa por extensão Ranking das extensões mais encontradas
+Total de máquinas
+Total de usuários
+Total de extensões
+Total de instalações
+Pesquisa por computador
+Pesquisa por usuário
+Pesquisa por extensão
+Ranking das extensões mais encontradas
+
+Possíveis evoluções
+
+Algumas melhorias que podem ser implementadas futuramente:
+
+Suporte a Microsoft Edge e Firefox
+Execução periódica via Task Scheduler
+Integração com SIEM
