@@ -49,7 +49,7 @@ foreach ($user in Get-ChildItem $usersPath -Directory) {
 }
 
 # Exportar para arquivo no caminho de rede
-$arquivo = "\\FILESERVER02\ArquivosCopobras\Extensoes\$($env:COMPUTERNAME).txt"
+$arquivo = "\\pasta-compartilha\Extensoes\$($env:COMPUTERNAME).txt"
 $saida | Out-File -FilePath $arquivo -Encoding UTF8
 
 Write-Output "Relatório salvo em: $arquivo"
