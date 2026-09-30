@@ -73,7 +73,7 @@ Total de registros
 Arquivos processados
 Arquivos com erro
 
-4. Dashboard
+**4. Dashboard**
 
 Os dados consolidados são utilizados para gerar um dashboard HTML contendo:
 
