@@ -24,9 +24,19 @@ Dashboard HTML com pesquisa
 
 ##Fluxo de funcionamento
 
-Coleta
+**1. Coleta**
 Uma GPO executa o script de coleta durante o logon do usuário.
-O script percorre os perfis existentes em: C:\Users<usuario>\AppData\Local\Google\Chrome\User Data
+O script percorre os perfis existentes em: C:\Users\<usuario>\AppData\Local\Google\Chrome\User Data
+
+Arquivos envolvidos:
+
+Scripts/Executar-ColetaExtensoes.bat — chamado pela GPO
+Scripts/lista_extensoes_json.ps1 — script real de coleta
+
+Por que um .bat e não chamar o .ps1 direto?
+
+Em muitos ambientes, usuários comuns não têm permissão para executar scripts PowerShell diretamente — seja por ExecutionPolicy, AppLocker, WDAC ou políticas de restrição de scripts. O .bat atua como um
+wrapper: ele é executado pela GPO e invoca o PowerShell com **-ExecutionPolicy Bypass -NoProfile**, garantindo que a coleta funcionesem exigir privilégios administrativos do usuário logado.
 
 e identifica os diretórios de extensões. Para cada extensão são coletadas informações como:
 
@@ -37,18 +47,18 @@ Extension ID
 Version
 ScanDate
 
-2. Armazenamento
+**2. Armazenamento**
 
 Cada estação gera seu próprio arquivo JSON em um compartilhamento de rede.
 
 Exemplo:
 
-\fileserver\Extensoes\PC-001.json
-\fileserver\Extensoes\PC-002.json
+\\fileserver\Extensoes\PC-001.json
+\\fileserver\Extensoes\PC-002.json
 
-3. Consolidação
+**3. Consolidação**
 
-O script de consolidação lê os inventários individuais e gera:
+O script de consolidação **Consolidar-Extensoes-html.ps1** lê os inventários individuais e gera:
 
 dados_consolidados.json 
 relatorio_completo.csv 
