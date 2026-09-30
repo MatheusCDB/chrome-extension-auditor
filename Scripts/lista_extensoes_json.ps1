@@ -1,4 +1,4 @@
-# Inventario-Chrome.ps1
+ Inventario-Chrome.ps1
 # Coleta extensões do Chrome e gera JSON no compartilhamento
 
 $usersPath = "C:\Users"
