@@ -78,7 +78,7 @@ foreach ($user in Get-ChildItem $usersPath -Directory) {
 
 # Gera JSON e salva
 $jsonOutput = $extensoesColetadas | ConvertTo-Json -Depth 3
-$arquivoJson = "\\fileserver02.copobras.local\ArquivosCopobras\Extensoes\$($env:COMPUTERNAME).json"
+$arquivoJson = "\\pasta-compartilhada\Extensoes\$($env:COMPUTERNAME).json"
 $jsonOutput | Out-File -FilePath $arquivoJson -Encoding UTF8
 
 Write-Output "Inventário concluído. Arquivo salvo em: $arquivoJson"
