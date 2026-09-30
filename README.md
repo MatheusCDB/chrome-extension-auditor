@@ -12,7 +12,7 @@
 
 ---
 
-## 🎯 O problema
+## O problema
 
 Auditar extensões instaladas manualmente em centenas de máquinas é inviável.
 Extensões não autorizadas representam risco real de segurança:
@@ -23,10 +23,10 @@ Extensões não autorizadas representam risco real de segurança:
 - Bypass de políticas corporativas
 
 Antes de bloquear extensões via GPO com **ADMX/ADM**, é essencial saber
-**o que já existe** nos ativos — pode haver extensões legítimas e críticas
+**o que já existe** nos ativos pode haver extensões legítimas e críticas
 para o negócio que seriam bloqueadas por engano.
 
-## 💡 A solução
+## A solução
 
 Um pipeline em 3 camadas:
 
@@ -44,7 +44,7 @@ Um pipeline em 3 camadas:
 
 ---
 
-## ✨ Principais recursos
+## Principais recursos
 
 ### Coleta
 - ✅ Automática via GPO (boot/logon)
@@ -71,7 +71,7 @@ Um pipeline em 3 camadas:
 
 ---
 
-## 📂 Estrutura do repositório
+## Estrutura do repositório
 
 | Caminho | Descrição |
 |---|---|
@@ -89,9 +89,9 @@ Um pipeline em 3 camadas:
 O passo a passo detalhado — criação da GPO, permissões de compartilhamento,
 `gpupdate`, agendamento da consolidação e troubleshooting — está em:
 
-👉 **[docs/implantacao.md](docs/implantacao.md)**
+ **[docs/implantacao.md](docs/implantacao.md)**
 
-### ⚡ Resumo em 3 passos
+### Resumo em 3 passos
 
 1. **Coleta** — publique os scripts no SYSVOL e crie uma GPO apontando para
    `Executar-ColetaExtensoes.bat` (Computer Configuration → Startup Scripts).
@@ -129,7 +129,7 @@ Relatorio_Extensoes.html     → dashboard interativo
 
 ---
 
-## 🤔 Por que um `.bat` e não chamar o `.ps1` direto?
+## Por que um `.bat` e não chamar o `.ps1` direto?
 
 Em muitos ambientes, usuários comuns **não têm permissão** para executar
 scripts PowerShell diretamente — seja por `ExecutionPolicy`, AppLocker,
@@ -141,13 +141,13 @@ sem exigir privilégios administrativos do usuário logado.
 
 ---
 
-## 📊 Exemplo de saída
+## Exemplo de saída
 
 ![Dashboard do inventário de extensões](https://github.com/user-attachments/assets/6a3a27a3-bba9-4730-896c-829228230f31)
 
 ---
 
-## 🔮 Possíveis evoluções
+## Possíveis evoluções
 
 - Suporte a **Microsoft Edge** e **Firefox**
 - Execução periódica via **Task Scheduler** (já documentada em `docs/implantacao.md`)
