@@ -83,3 +83,8 @@ Algumas melhorias que podem ser implementadas futuramente:
 Suporte a Microsoft Edge e Firefox
 Execução periódica via Task Scheduler
 Integração com SIEM
+
+Exemplo da Saida HTML:
+
+<img width="1447" height="919" alt="image" src="https://github.com/user-attachments/assets/6a3a27a3-bba9-4730-896c-829228230f31" />
+
