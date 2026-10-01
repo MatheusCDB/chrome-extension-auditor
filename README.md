@@ -145,7 +145,7 @@ sem exigir privilégios administrativos do usuário logado.
 
 🔗 **[Clique aqui para explorar o dashboard interativo]()**
 
-![Dashboard do inventário de extensões]([https://github.com/user-attachments/assets/6a3a27a3-bba9-4730-896c-829228230f31](https://htmlpreview.github.io/?https://github.com/MatheusCDB/chrome-extension-auditor/blob/main/Docs/Relatorio_Extensoes.html))
+🔗 **[Clique aqui para explorar o dashboard interativo](https://htmlpreview.github.io/?https://github.com/MatheusCDB/FileServer-Permission-Auditor/blob/main/docs/Dashboard_Permissoes.html)**
 
 ---
 
