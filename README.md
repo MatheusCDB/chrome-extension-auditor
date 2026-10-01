@@ -141,7 +141,9 @@ sem exigir privilégios administrativos do usuário logado.
 
 ---
 
-## Exemplo de saída
+## Exemplo de saída e Pré-visualização do Dashboard
+
+🔗 **[Clique aqui para explorar o dashboard interativo](https://htmlpreview.github.io/?https://github.com/MatheusCDB/FileServer-Permission-Auditor/blob/main/docs/Dashboard_Permissoes.html)**
 
 ![Dashboard do inventário de extensões](https://github.com/user-attachments/assets/6a3a27a3-bba9-4730-896c-829228230f31)
 
