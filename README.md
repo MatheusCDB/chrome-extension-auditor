@@ -143,7 +143,7 @@ sem exigir privilégios administrativos do usuário logado.
 
 ## Exemplo de saída e Pré-visualização do Dashboard
 
-🔗 **[Clique aqui para explorar o dashboard interativo][(https://htmlpreview.github.io/?https://github.com/MatheusCDB/FileServer-Permission-Auditor/blob/main/docs/Dashboard_Permissoes.html)](https://htmlpreview.github.io/?https://github.com/MatheusCDB/chrome-extension-auditor/blob/main/Docs/Relatorio_Extensoes.html)**
+🔗 **[Clique aqui para explorar o dashboard interativo](https://htmlpreview.github.io/?https://github.com/MatheusCDB/FileServer-Permission-Auditor/blob/main/docs/Dashboard_Permissoes.html)**
 
 ---
 
