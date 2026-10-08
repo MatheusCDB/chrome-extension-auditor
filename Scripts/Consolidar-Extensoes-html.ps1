@@ -5,11 +5,11 @@
     Consolida os JSONs das estações, gera relatório CSV, log,
     dashboard HTML e abre no navegador. Tudo em um único script.
 .EXAMPLE
-    .\Auditoria-Extensoes.ps1
-    .\Auditoria-Extensoes.ps1 -PastaExtensoes "D:\Teste"
+    .\Consolidar-Extensoes-html.ps1
+    .\Consolidar-Extensoes-html.ps1 -PastaExtensoes "D:\Teste"
 #>
 param(
-    [string]$PastaExtensoes = "\\fileserver.dominio.local\Extensoes",
+    [string]$PastaExtensoes = "\\fileserver02.copobras.local\ArquivosCopobras\Extensoes",
     [switch]$NaoAbrirNavegador
 )
 
@@ -64,13 +64,13 @@ $arquivosComErro      = 0
 $totalRegistros       = 0
 
 foreach ($arquivo in $arquivos) {
-    Write-Host "  → $($arquivo.Name)..." -NoNewline
+    Write-Host "  -> $($arquivo.Name)..." -NoNewline
 
     try {
         $conteudo = Get-Content $arquivo.FullName -Raw -Encoding UTF8
 
         if ([string]::IsNullOrWhiteSpace($conteudo)) {
-            Write-Host " ⚠️  VAZIO" -ForegroundColor Yellow
+            Write-Host " [VAZIO]" -ForegroundColor Yellow
             Write-Log "ARQUIVO VAZIO: $($arquivo.Name)" "Yellow" -SomenteLog
             $arquivosComErro++
             continue
@@ -80,7 +80,7 @@ foreach ($arquivo in $arquivos) {
         if ($jsonData -isnot [array]) { $jsonData = @($jsonData) }
 
         if ($jsonData.Count -eq 0) {
-            Write-Host " ⚠️  SEM DADOS" -ForegroundColor Yellow
+            Write-Host " [SEM DADOS]" -ForegroundColor Yellow
             Write-Log "SEM DADOS: $($arquivo.Name)" "Yellow" -SomenteLog
             $arquivosComErro++
             continue
@@ -90,11 +90,11 @@ foreach ($arquivo in $arquivos) {
         $arquivosProcessados++
         $totalRegistros += $jsonData.Count
 
-        Write-Host " ✅ $($jsonData.Count) registros" -ForegroundColor Green
+        Write-Host " [OK] $($jsonData.Count) registros" -ForegroundColor Green
         Write-Log "$($arquivo.Name) - $($jsonData.Count) registros" "White" -SomenteLog
 
     } catch {
-        Write-Host " ❌ ERRO: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host " [ERRO]: $($_.Exception.Message)" -ForegroundColor Red
         Write-Log "ERRO em $($arquivo.Name): $($_.Exception.Message)" "Red" -SomenteLog
         $arquivosComErro++
     }
@@ -127,11 +127,11 @@ Write-Host ""
 # ===== SALVA ARQUIVOS =====
 Write-Host "Salvando arquivos..." -ForegroundColor Yellow
 
-$dadosConsolidados | ConvertTo-Json -Depth 3 | Out-File -FilePath $arquivoConsolidado -Encoding UTF8
-Write-Host "  ✅ JSON: $arquivoConsolidado" -ForegroundColor Green
+$dadosConsolidados | ConvertTo-Json -Depth 10 | Out-File -FilePath $arquivoConsolidado -Encoding UTF8
+Write-Host "  [OK] JSON: $arquivoConsolidado" -ForegroundColor Green
 
 $dadosConsolidados | Export-Csv -Path $arquivoCSV -NoTypeInformation -Encoding UTF8
-Write-Host "  ✅ CSV:  $arquivoCSV" -ForegroundColor Green
+Write-Host "  [OK] CSV:  $arquivoCSV" -ForegroundColor Green
 
 Write-Log "Total de registros: $totalRegistros"  "White" -SomenteLog
 Write-Log "Máquinas únicas: $maquinasUnicas"     "White" -SomenteLog
@@ -166,10 +166,10 @@ if ($extensoesUnicasLista.Count -gt 0) {
     foreach ($ext in $extensoesUnicasLista) {
         $computador = ($dadosConsolidados | Where-Object { $_.Extension -eq $ext.Name } |
                       Select-Object -First 1).Computer
-        Write-Host "⚠️  $($ext.Name) - $computador" -ForegroundColor Yellow
+        Write-Host "[!] $($ext.Name) - $computador" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "✅ Nenhuma extensão única encontrada" -ForegroundColor Green
+    Write-Host "[OK] Nenhuma extensão única encontrada" -ForegroundColor Green
 }
 
 # ===== FASE 2: GERAR DASHBOARD HTML =====
@@ -180,12 +180,11 @@ Write-Host ""
 # Carrega template (arquivo externo ou fallback embutido)
 $htmlTemplate = $null
 if (Test-Path $templateHtml) {
-    Write-Host "  ✅ Template encontrado: $templateHtml" -ForegroundColor Green
+    Write-Host "  [OK] Template encontrado: $templateHtml" -ForegroundColor Green
     $htmlTemplate = Get-Content $templateHtml -Raw -Encoding UTF8
 } else {
-    Write-Host "  ⚠️  Template não encontrado. Usando HTML embutido..." -ForegroundColor Yellow
-    # ⬇️ COLE AQUI O CONTEÚDO DO TEMPLATE (o grande bloco HTML)
-    # Deixe o placeholder: var dadosExtensoes = DADOS_AQUI;
+    Write-Host "  [!] Template não encontrado. Usando HTML embutido..." -ForegroundColor Yellow
+
     $htmlTemplate = @'
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -214,378 +213,113 @@ if (Test-Path $templateHtml) {
             --gray-700: #334155;
             --gray-800: #1e293b;
             --gray-900: #0f172a;
-            --warning: #f59e0b;
-            --success: #10b981;
-            --danger: #ef4444;
         }
-
         * { box-sizing: border-box; }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: var(--gray-100);
-            padding: 0;
-            margin: 0;
+            padding: 0; margin: 0;
             color: var(--gray-800);
             line-height: 1.5;
         }
-
-        .container {
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        /* ===== HEADER ===== */
+        .container { max-width: 1500px; margin: 0 auto; padding: 24px; }
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--primary-lighter) 100%);
-            color: #fff;
-            padding: 40px 32px;
-            border-radius: 16px;
-            margin-bottom: 28px;
-            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3), 0 8px 10px -6px rgba(15, 23, 42, 0.2);
-            position: relative;
-            overflow: hidden;
+            color: #fff; padding: 40px 32px; border-radius: 16px; margin-bottom: 28px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+            position: relative; overflow: hidden;
         }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .header h1 {
-            margin: 0 0 8px 0;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            position: relative;
-        }
-
-        .header h1 i {
-            margin-right: 12px;
-            color: var(--accent);
-        }
-
-        .header .subtitle {
-            font-size: 14px;
-            color: var(--gray-300);
-            position: relative;
-        }
-
-        .header .subtitle i {
-            margin-right: 6px;
-        }
-
-        /* ===== STATS CARDS ===== */
+        .header h1 { margin: 0 0 8px 0; font-size: 28px; font-weight: 700; }
+        .header h1 i { margin-right: 12px; color: var(--accent); }
+        .header .subtitle { font-size: 14px; color: var(--gray-300); }
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 28px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px; margin-bottom: 28px;
         }
-
         .stat-card {
-            background: #fff;
-            padding: 24px;
-            border-radius: 14px;
+            background: #fff; padding: 24px; border-radius: 14px;
             border: 1px solid var(--gray-200);
             box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
         }
-
         .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--accent);
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 4px; height: 100%; background: var(--accent);
         }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
-            border-color: var(--gray-300);
-        }
-
-        .stat-card .stat-icon {
-            font-size: 20px;
-            color: var(--accent);
-            margin-bottom: 12px;
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: -1px;
-            line-height: 1;
-            margin-bottom: 6px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--gray-500);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* ===== SEARCH ===== */
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-        }
-
+        .stat-icon { font-size: 20px; color: var(--accent); margin-bottom: 12px; }
+        .stat-number { font-size: 32px; font-weight: 700; color: var(--primary); line-height: 1; margin-bottom: 6px; }
+        .stat-label { font-size: 13px; color: var(--gray-500); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .search-box { position: relative; margin-bottom: 20px; }
+        .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gray-400); }
         #searchInput {
-            width: 100%;
-            max-width: 420px;
-            padding: 12px 16px 12px 44px;
-            border: 1px solid var(--gray-300);
-            border-radius: 10px;
-            font-size: 14px;
-            background: #fff;
-            color: var(--gray-800);
-            transition: all 0.2s ease;
-            outline: none;
+            width: 100%; max-width: 420px; padding: 12px 16px 12px 44px;
+            border: 1px solid var(--gray-300); border-radius: 10px; font-size: 14px;
+            background: #fff; color: var(--gray-800); outline: none;
         }
-
-        #searchInput:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-
-        #searchInput::placeholder {
-            color: var(--gray-400);
-        }
-
-        /* ===== TABLE ===== */
+        #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
         .table-wrapper {
-            background: #fff;
-            border-radius: 14px;
-            border: 1px solid var(--gray-200);
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-            overflow: hidden;
-            margin-bottom: 28px;
+            background: #fff; border-radius: 14px; border: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06); overflow: hidden; margin-bottom: 28px;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        thead {
-            background: var(--primary);
-            color: #fff;
-        }
-
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background: var(--primary); color: #fff; }
         thead th {
-            padding: 14px 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gray-200);
-            border-bottom: 2px solid var(--accent);
-            white-space: nowrap;
+            padding: 14px 16px; text-align: left; font-weight: 600;
+            font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--gray-200); border-bottom: 2px solid var(--accent); white-space: nowrap;
         }
-
-        tbody tr {
-            border-bottom: 1px solid var(--gray-100);
-            transition: background 0.15s ease;
-        }
-
-        tbody tr:hover {
-            background: var(--gray-50);
-        }
-
-        tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        tbody td {
-            padding: 12px 16px;
-            color: var(--gray-700);
-            vertical-align: middle;
-        }
-
-        tbody td:first-child {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .ext-name {
-            font-weight: 500;
-            color: var(--gray-800);
-        }
-
+        tbody tr { border-bottom: 1px solid var(--gray-100); }
+        tbody tr:hover { background: var(--gray-50); }
+        tbody td { padding: 12px 16px; color: var(--gray-700); vertical-align: middle; }
+        tbody td:first-child { font-weight: 600; color: var(--primary); }
+        .ext-name { font-weight: 500; color: var(--gray-800); }
         .ext-id {
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            color: var(--gray-500);
-            background: var(--gray-100);
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-family: "Courier New", monospace; font-size: 11px; color: var(--gray-500);
+            background: var(--gray-100); padding: 2px 6px; border-radius: 4px;
         }
-
         .version-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            background: var(--gray-100);
-            color: var(--gray-600);
+            display: inline-block; padding: 2px 8px; border-radius: 12px;
+            font-size: 11px; font-weight: 600;
+            background: var(--gray-100); color: var(--gray-600);
         }
-
-        /* ===== BOTÃO ANÁLISE ===== */
         .btn-analise {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            white-space: nowrap;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; background: var(--accent); color: #fff;
+            border-radius: 8px; font-size: 12px; font-weight: 600;
+            text-decoration: none; white-space: nowrap;
         }
-
         .btn-analise:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
+            background: var(--accent-hover); color: #fff; text-decoration: none;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
-            color: #fff;
-            text-decoration: none;
         }
-
-        .btn-analise:active {
-            transform: translateY(0);
-        }
-
-        .btn-analise i {
-            font-size: 11px;
-        }
-
-        /* ===== RANKING ===== */
         .ranking-section {
-            background: #fff;
-            border-radius: 14px;
-            border: 1px solid var(--gray-200);
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-            padding: 24px;
+            background: #fff; border-radius: 14px; border: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06); padding: 24px;
         }
-
         .ranking-section h3 {
-            margin: 0 0 20px 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin: 0 0 20px 0; font-size: 18px; font-weight: 700;
+            color: var(--primary); display: flex; align-items: center; gap: 10px;
         }
-
-        .ranking-section h3 i {
-            color: var(--accent);
-        }
-
+        .ranking-section h3 i { color: var(--accent); }
         .ranking-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--gray-100);
-            gap: 14px;
+            display: flex; align-items: center; padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100); gap: 14px;
         }
-
-        .ranking-item:last-child {
-            border-bottom: none;
-        }
-
+        .ranking-item:last-child { border-bottom: none; }
         .ranking-position {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: var(--gray-100);
-            color: var(--gray-600);
-            font-weight: 700;
-            font-size: 13px;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 8px;
+            background: var(--gray-100); color: var(--gray-600);
+            font-weight: 700; font-size: 13px; flex-shrink: 0;
         }
-
-        .ranking-item:nth-child(1) .ranking-position {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #fff;
-        }
-
-        .ranking-item:nth-child(2) .ranking-position {
-            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
-            color: #fff;
-        }
-
-        .ranking-item:nth-child(3) .ranking-position {
-            background: linear-gradient(135deg, #d97706, #b45309);
-            color: #fff;
-        }
-
-        .ranking-name {
-            flex: 1;
-            font-weight: 500;
-            color: var(--gray-700);
-            font-size: 13px;
-        }
-
+        .ranking-item:nth-child(1) .ranking-position { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; }
+        .ranking-item:nth-child(2) .ranking-position { background: linear-gradient(135deg, #cbd5e1, #94a3b8); color: #fff; }
+        .ranking-item:nth-child(3) .ranking-position { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+        .ranking-name { flex: 1; font-weight: 500; color: var(--gray-700); font-size: 13px; }
         .ranking-count {
-            font-size: 12px;
-            color: var(--gray-500);
-            background: var(--gray-100);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            white-space: nowrap;
+            font-size: 12px; color: var(--gray-500); background: var(--gray-100);
+            padding: 4px 10px; border-radius: 12px; font-weight: 600; white-space: nowrap;
         }
-
-        /* ===== DATATABLES OVERRIDES ===== */
-        .dataTables_wrapper .dataTables_filter input {
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            padding: 6px 10px;
-        }
-
-        .dataTables_wrapper .dataTables_length select {
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            padding: 4px 8px;
-        }
-
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .header { padding: 24px 20px; }
@@ -598,15 +332,11 @@ if (Test-Path $templateHtml) {
 </head>
 <body>
 <div class="container">
-    <!-- HEADER -->
     <div class="header">
         <h1><i class="fas fa-puzzle-piece"></i>Chrome Extension Inventory</h1>
-        <div class="subtitle">
-            <i class="fas fa-clock"></i>Atualizado em: <span id="dataAtualizacao"></span>
-        </div>
+        <div class="subtitle"><i class="fas fa-clock"></i>Atualizado em: <span id="dataAtualizacao"></span></div>
     </div>
 
-    <!-- STATS -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-desktop"></i></div>
@@ -630,13 +360,11 @@ if (Test-Path $templateHtml) {
         </div>
     </div>
 
-    <!-- SEARCH -->
     <div class="search-box">
         <i class="fas fa-search"></i>
         <input type="text" id="searchInput" placeholder="Pesquisar por computador, usuário ou extensão..." onkeyup="renderizarTabela()">
     </div>
 
-    <!-- TABLE -->
     <div class="table-wrapper">
         <table id="tabela">
             <thead>
@@ -654,7 +382,6 @@ if (Test-Path $templateHtml) {
         </table>
     </div>
 
-    <!-- RANKING -->
     <div class="ranking-section">
         <h3><i class="fas fa-trophy"></i>Top 15 Extensões Mais Instaladas</h3>
         <div id="rankingMaisInstaladas"></div>
@@ -664,26 +391,24 @@ if (Test-Path $templateHtml) {
 <script>
     var dadosExtensoes = DADOS_AQUI;
 
-    // ===== FUNÇÃO AUXILIAR: ESCAPE HTML =====
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
-        const div = document.createElement('div');
+        var div = document.createElement('div');
         div.textContent = String(text);
         return div.innerHTML;
     }
 
-    // ===== RENDERIZAR TABELA =====
     function renderizarTabela() {
-        const search = document.getElementById('searchInput').value.toLowerCase().trim();
-        const tbody = document.getElementById('tableBody');
+        var search = document.getElementById('searchInput').value.toLowerCase().trim();
+        var tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        const filtrados = dadosExtensoes.filter(d => {
+        var filtrados = dadosExtensoes.filter(function(d) {
             if (!search) return true;
-            return (d.Computer && d.Computer.toLowerCase().includes(search)) ||
-                   (d.User && d.User.toLowerCase().includes(search)) ||
-                   (d.Extension && d.Extension.toLowerCase().includes(search)) ||
-                   (d.ID && d.ID.toLowerCase().includes(search));
+            return (d.Computer && d.Computer.toLowerCase().indexOf(search) !== -1) ||
+                   (d.User && d.User.toLowerCase().indexOf(search) !== -1) ||
+                   (d.Extension && d.Extension.toLowerCase().indexOf(search) !== -1) ||
+                   (d.ID && d.ID.toLowerCase().indexOf(search) !== -1);
         });
 
         if (filtrados.length === 0) {
@@ -691,79 +416,108 @@ if (Test-Path $templateHtml) {
             return;
         }
 
-        // Limita a 500 linhas para performance
-        const limite = filtrados.slice(0, 500);
-        let html = '';
+        var limite = filtrados.slice(0, 500);
+        var html = '';
 
-        limite.forEach(d => {
-            const id = escapeHtml(d.ID || '');
-            const linkAnalise = id ? `https://extensionshield.com/scan/results/${encodeURIComponent(id)}` : '#';
+        limite.forEach(function(d) {
+            var id = escapeHtml(d.ID || '');
+            var linkAnalise = id ? 'https://extensionshield.com/scan/results/' + encodeURIComponent(id) : '#';
+            var btnHtml = id
+                ? '<a href="' + linkAnalise + '" target="_blank" rel="noopener noreferrer" class="btn-analise" title="Analisar no ExtensionShield"><i class="fas fa-shield-alt"></i>Analisar</a>'
+                : '<span style="color:#94a3b8;font-size:11px;">&mdash;</span>';
 
-            html += `<tr>
-                <td>${escapeHtml(d.Computer)}</td>
-                <td>${escapeHtml(d.User)}</td>
-                <td>${escapeHtml(d.Profile)}</td>
-                <td><span class="ext-name">${escapeHtml(d.Extension)}</span></td>
-                <td><span class="ext-id">${id || 'N/A'}</span></td>
-                <td>${d.Version ? `<span class="version-badge">${escapeHtml(d.Version)}</span>` : '<span style="color:#94a3b8;">N/A</span>'}</td>
-                <td>
-                    ${id
-                        ? `<a href="${linkAnalise}" target="_blank" rel="noopener noreferrer" class="btn-analise" title="Analisar no ExtensionShield">
-                             <i class="fas fa-shield-alt"></i>Analisar
-                           </a>`
-                        : '<span style="color:#94a3b8;font-size:11px;">—</span>'}
-                </td>
-            </tr>`;
+            html += '<tr>'
+                + '<td>' + escapeHtml(d.Computer) + '</td>'
+                + '<td>' + escapeHtml(d.User) + '</td>'
+                + '<td>' + escapeHtml(d.Profile) + '</td>'
+                + '<td><span class="ext-name">' + escapeHtml(d.Extension) + '</span></td>'
+                + '<td><span class="ext-id">' + (id || 'N/A') + '</span></td>'
+                + '<td>' + (d.Version ? '<span class="version-badge">' + escapeHtml(d.Version) + '</span>' : '<span style="color:#94a3b8;">N/A</span>') + '</td>'
+                + '<td>' + btnHtml + '</td>'
+                + '</tr>';
         });
 
         tbody.innerHTML = html;
 
         if (filtrados.length > 500) {
-            tbody.innerHTML += `<tr><td colspan="7" style="text-align:center;padding:16px;color:#f59e0b;font-size:12px;font-weight:600;">
-                ⚠️ Mostrando 500 de ${filtrados.length} resultados. Refine sua pesquisa para ver mais.
-            </td></tr>`;
+            tbody.innerHTML += '<tr><td colspan="7" style="text-align:center;padding:16px;color:#f59e0b;font-size:12px;font-weight:600;">Mostrando 500 de ' + filtrados.length + ' resultados. Refine sua pesquisa para ver mais.</td></tr>';
         }
     }
 
-    // ===== RENDERIZAR RANKING =====
     function renderizarRanking() {
-        const contagem = {};
-        dadosExtensoes.forEach(d => {
-            const nome = d.Extension || 'Desconhecida';
+        var contagem = {};
+        dadosExtensoes.forEach(function(d) {
+            var nome = d.Extension || 'Desconhecida';
             contagem[nome] = (contagem[nome] || 0) + 1;
         });
 
-        const sorted = Object.entries(contagem)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 15);
+        var sorted = Object.keys(contagem).map(function(k) {
+            return [k, contagem[k]];
+        }).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 15);
 
-        const container = document.getElementById('rankingMaisInstaladas');
+        var container = document.getElementById('rankingMaisInstaladas');
 
         if (sorted.length === 0) {
             container.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;">Sem dados</div>';
             return;
         }
 
-        container.innerHTML = sorted.map(([nome, count], i) =>
-            `<div class="ranking-item">
-                <div class="ranking-position">${i + 1}</div>
-                <div class="ranking-name">${escapeHtml(nome)}</div>
-                <div class="ranking-count">${count} ${count === 1 ? 'máquina' : 'máquinas'}</div>
-            </div>`
-        ).join('');
+        container.innerHTML = sorted.map(function(item, i) {
+            var nome = item[0], count = item[1];
+            var unidade = (count === 1) ? 'máquina' : 'máquinas';
+            return '<div class="ranking-item">'
+                + '<div class="ranking-position">' + (i + 1) + '</div>'
+                + '<div class="ranking-name">' + escapeHtml(nome) + '</div>'
+                + '<div class="ranking-count">' + count + ' ' + unidade + '</div>'
+                + '</div>';
+        }).join('');
     }
 
-    // ===== ESTATÍSTICAS =====
-    document.getElementById('statComputadores').textContent = new Set(dadosExtensoes.map(d => d.Computer).filter(Boolean)).size;
-    document.getElementById('statUsuarios').textContent    = new Set(dadosExtensoes.map(d => d.User).filter(Boolean)).size;
-    document.getElementById('statExtensoes').textContent   = new Set(dadosExtensoes.map(d => d.ID).filter(Boolean)).size;
+    document.getElementById('statComputadores').textContent = new Set(dadosExtensoes.map(function(d){return d.Computer;}).filter(Boolean)).size;
+    document.getElementById('statUsuarios').textContent    = new Set(dadosExtensoes.map(function(d){return d.User;}).filter(Boolean)).size;
+    document.getElementById('statExtensoes').textContent   = new Set(dadosExtensoes.map(function(d){return d.ID;}).filter(Boolean)).size;
     document.getElementById('statInstalacoes').textContent = dadosExtensoes.length;
     document.getElementById('dataAtualizacao').textContent = new Date().toLocaleString('pt-BR');
 
-    // ===== INICIALIZAÇÃO =====
     renderizarTabela();
     renderizarRanking();
 </script>
 </body>
 </html>
 '@
+}
+
+# Injeta os dados usando .Replace (seguro contra regex e $)
+$jsonData  = $dadosConsolidados | ConvertTo-Json -Depth 10 -Compress
+$htmlFinal = $htmlTemplate.Replace('DADOS_AQUI;', "$jsonData;")
+
+try {
+    # Grava sem BOM para evitar caracteres estranhos no início do HTML
+    [System.IO.File]::WriteAllText($arquivoHtmlSaida, $htmlFinal, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "  [OK] Dashboard: $arquivoHtmlSaida" -ForegroundColor Green
+    Write-Host "  Registros: $($dadosConsolidados.Count)" -ForegroundColor Cyan
+} catch {
+    Write-Log "ERRO ao salvar HTML: $($_.Exception.Message)" "Red"
+    exit 1
+}
+
+# ===== FINALIZAÇÃO =====
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "AUDITORIA CONCLUÍDA!" -ForegroundColor Green
+Write-Host "Log: $arquivoLog" -ForegroundColor Gray
+Write-Host "========================================" -ForegroundColor Cyan
+
+Write-Log "=== AUDITORIA CONCLUÍDA EM $dataAtual ===" "White" -SomenteLog
+Write-Log "Arquivos processados: $arquivosProcessados" "White" -SomenteLog
+Write-Log "Total de registros: $totalRegistros" "White" -SomenteLog
+
+if (-not $NaoAbrirNavegador) {
+    Start-Process $arquivoHtmlSaida
+}
+
+<footer class="footer">
+    <i class="fas fa-code"></i>
+    Desenvolvido por <strong>Matheus S. Santos</strong>
+    &middot; <span id="anoAtual"></span>
+</footer>
