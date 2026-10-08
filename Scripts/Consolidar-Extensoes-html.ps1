@@ -406,6 +406,13 @@ if (Test-Path $templateHtml) {
         <h3><i class="fas fa-trophy"></i>Top 15 Extensões Mais Instaladas</h3>
         <div id="rankingMaisInstaladas"></div>
     </div>
+
+    <!-- FOOTER / ASSINATURA -->
+    <footer class="footer">
+        <i class="fas fa-code"></i>
+        Desenvolvido por <strong>Matheus S. Santos</strong>
+        &middot; <span id="anoAtual"></span>
+    </footer>
 </div>
 
 <script>
@@ -498,6 +505,7 @@ if (Test-Path $templateHtml) {
     document.getElementById('statExtensoes').textContent   = new Set(dadosExtensoes.map(function(d){return d.ID;}).filter(Boolean)).size;
     document.getElementById('statInstalacoes').textContent = dadosExtensoes.length;
     document.getElementById('dataAtualizacao').textContent = new Date().toLocaleString('pt-BR');
+    document.getElementById('anoAtual').textContent = new Date().getFullYear();
 
     renderizarTabela();
     renderizarRanking();
