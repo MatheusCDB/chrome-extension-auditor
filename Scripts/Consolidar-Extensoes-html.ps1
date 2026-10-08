@@ -320,6 +320,26 @@ if (Test-Path $templateHtml) {
             font-size: 12px; color: var(--gray-500); background: var(--gray-100);
             padding: 4px 10px; border-radius: 12px; font-weight: 600; white-space: nowrap;
         }
+
+                /* ===== FOOTER / ASSINATURA ===== */
+        .footer {
+            margin-top: 40px;
+            padding: 20px 24px;
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--gray-600);
+            font-size: 13px;
+        }
+
+        .footer i { color: var(--accent); }
+        .footer strong { color: var(--primary); font-weight: 600; }
+        
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .header { padding: 24px 20px; }
@@ -515,9 +535,3 @@ Write-Log "Total de registros: $totalRegistros" "White" -SomenteLog
 if (-not $NaoAbrirNavegador) {
     Start-Process $arquivoHtmlSaida
 }
-
-<footer class="footer">
-    <i class="fas fa-code"></i>
-    Desenvolvido por <strong>Matheus S. Santos</strong>
-    &middot; <span id="anoAtual"></span>
-</footer>
