@@ -37,7 +37,7 @@ Um pipeline em 3 camadas:
 └──────────────┘     └──────────────────┘     └─────────────────┘
    GPO + .bat            .ps1 único              HTML + JS
    gera JSON             gera JSON/CSV/log       busca em tempo real
-   por máquina           + dashboard HTML        + rankings
+   por máquina           + dashboard HTML        + rankings + análise 🔍
 ```
 
 **Coleta via GPO → consolidação central → dashboard HTML interativo.**
@@ -63,11 +63,15 @@ Um pipeline em 3 camadas:
 - ✅ **Detecção de extensões presentes em apenas 1 estação** ⚠️
 
 ### Dashboard
-- ✅ HTML estático, sem backend
-- ✅ Pesquisa em tempo real (computador / usuário / extensão / ID)
-- ✅ Ranking das extensões mais instaladas
-- ✅ Exportação para CSV direto do navegador
-- ✅ Geração automática ao final da consolidação
+✅ HTML estático, sem backend
+✅ Pesquisa em tempo real (computador / usuário / extensão / ID)
+✅ Análise individual de cada extensão via ExtensionShield 🔍
+✅ Ranking Top 15 das extensões mais instaladas
+✅ Seção dedicada a extensões presentes em apenas 1 estação ⚠️
+✅ Paginação (50 registros por página)
+✅ Visual moderno com paleta azul escuro / cinza
+✅ Exportação para CSV direto do navegador
+✅ Geração automática ao final da consolidação
 
 ---
 
@@ -144,6 +148,20 @@ sem exigir privilégios administrativos do usuário logado.
 ## Exemplo de saída e Pré-visualização do Dashboard
 
 🔗 **[Clique aqui para explorar o relatório de extensões](https://htmlpreview.github.io/?https://github.com/MatheusCDB/chrome-extension-auditor/blob/main/Docs/Relatorio_Extensoes.html)**
+
+---
+
+Cada extensão listada no dashboard possui um botão **"Analisar"** que redireciona
+para o [ExtensionShield](https://extensionshield.com), uma plataforma pública
+que avalia cada extensão sob três dimensões:
+
+- **🔒 Segurança** — vulnerabilidades conhecidas, permissões solicitadas
+- **🛡️ Privacidade** — coleta de dados, rastreamento, telemetria
+- **📋 Governança** — conformidade com políticas corporativas, histórico do desenvolvedor
+
+Isso permite uma **triagem rápida** antes de tomar decisões de bloqueio via GPO:
+em vez de bloquear por nome ou ID "no escuro", o analista pode avaliar o risco
+real de cada extensão diretamente pelo dashboard, sem sair da página.
 
 ---
 
