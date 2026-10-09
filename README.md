@@ -63,15 +63,15 @@ Um pipeline em 3 camadas:
 - ✅ **Detecção de extensões presentes em apenas 1 estação** ⚠️
 
 ### Dashboard
-✅ HTML estático, sem backend
-✅ Pesquisa em tempo real (computador / usuário / extensão / ID)
-✅ Análise individual de cada extensão via ExtensionShield 🔍
-✅ Ranking Top 15 das extensões mais instaladas
-✅ Seção dedicada a extensões presentes em apenas 1 estação ⚠️
-✅ Paginação (50 registros por página)
-✅ Visual moderno com paleta azul escuro / cinza
-✅ Exportação para CSV direto do navegador
-✅ Geração automática ao final da consolidação
+- ✅ HTML estático, sem backend
+- ✅ Pesquisa em tempo real (computador / usuário / extensão / ID)
+- ✅ Análise individual de cada extensão via ExtensionShield 🔍
+- ✅ Ranking Top 15 das extensões mais instaladas
+- ✅ Seção dedicada a extensões presentes em apenas 1 estação ⚠️
+- ✅ Paginação (50 registros por página)
+- ✅ Visual moderno com paleta azul escuro / cinza
+- ✅ Exportação para CSV direto do navegador
+- ✅ Geração automática ao final da consolidação
 
 ## Estrutura do repositório
 
