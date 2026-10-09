@@ -9,7 +9,7 @@
     .\Consolidar-Extensoes-html.ps1 -PastaExtensoes "D:\Teste"
 #>
 param(
-    [string]$PastaExtensoes = "\\fileserver02.copobras.local\ArquivosCopobras\Extensoes",
+    [string]$PastaExtensoes = "\\fileserver.empresa.local\Extensoes",
     [switch]$NaoAbrirNavegador
 )
 
@@ -192,10 +192,7 @@ if (Test-Path $templateHtml) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chrome Extension Inventory</title>
-    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <style>
         :root {
             --primary: #0f172a;
@@ -321,7 +318,80 @@ if (Test-Path $templateHtml) {
             padding: 4px 10px; border-radius: 12px; font-weight: 600; white-space: nowrap;
         }
 
-                /* ===== FOOTER / ASSINATURA ===== */
+        /* ===== EXTENSÕES ÚNICAS ===== */
+        .unicas-section {
+            background: #fff; border-radius: 14px; border: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06); padding: 24px;
+            margin-top: 28px;
+        }
+        .unicas-section h3 {
+            margin: 0 0 20px 0; font-size: 18px; font-weight: 700;
+            color: var(--primary); display: flex; align-items: center; gap: 10px;
+        }
+        .unicas-section h3 i { color: #f59e0b; }
+        .unicas-badge {
+            display: inline-block; margin-left: auto;
+            background: var(--gray-100); color: var(--gray-600);
+            padding: 4px 12px; border-radius: 12px;
+            font-size: 12px; font-weight: 600;
+        }
+        .unica-item {
+            display: flex; align-items: center; padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100); gap: 14px;
+        }
+        .unica-item:last-child { border-bottom: none; }
+        .unica-icon {
+            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 8px;
+            background: #fef3c7; color: #d97706;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .unica-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .unica-nome {
+            font-weight: 500; color: var(--gray-800); font-size: 13px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .unica-maquina {
+            font-size: 11px; color: var(--gray-500);
+            font-family: "Courier New", monospace;
+        }
+        .unica-analise { flex-shrink: 0; }
+        .unicas-empty {
+            text-align: center; padding: 24px; color: var(--gray-400); font-size: 13px;
+        }
+
+        /* ===== PAGINAÇÃO ===== */
+        .pagination {
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 16px; flex-wrap: wrap;
+            border-top: 1px solid var(--gray-100);
+        }
+        .pagination button {
+            min-width: 36px; height: 36px; padding: 0 10px;
+            border: 1px solid var(--gray-300); border-radius: 8px;
+            background: #fff; color: var(--gray-700);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .pagination button:hover:not(:disabled):not(.active) {
+            background: var(--gray-100); border-color: var(--gray-400);
+        }
+        .pagination button.active {
+            background: var(--accent); color: #fff; border-color: var(--accent);
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination-info {
+            font-size: 12px; color: var(--gray-500);
+            margin-left: 12px; padding-left: 12px;
+            border-left: 1px solid var(--gray-200);
+        }
+        .pagination-ellipsis {
+            color: var(--gray-400); padding: 0 4px;
+            font-size: 14px; user-select: none;
+        }
+
+        /* ===== FOOTER / ASSINATURA ===== */
         .footer {
             margin-top: 40px;
             padding: 20px 24px;
@@ -336,10 +406,9 @@ if (Test-Path $templateHtml) {
             color: var(--gray-600);
             font-size: 13px;
         }
-
         .footer i { color: var(--accent); }
         .footer strong { color: var(--primary); font-weight: 600; }
-        
+
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .header { padding: 24px 20px; }
@@ -382,7 +451,7 @@ if (Test-Path $templateHtml) {
 
     <div class="search-box">
         <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Pesquisar por computador, usuário ou extensão..." onkeyup="renderizarTabela()">
+        <input type="text" id="searchInput" placeholder="Pesquisar por computador, usuário ou extensão..." onkeyup="renderizarTabela(true)">
     </div>
 
     <div class="table-wrapper">
@@ -400,11 +469,21 @@ if (Test-Path $templateHtml) {
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
+        <div class="pagination" id="pagination"></div>
     </div>
 
     <div class="ranking-section">
         <h3><i class="fas fa-trophy"></i>Top 15 Extensões Mais Instaladas</h3>
         <div id="rankingMaisInstaladas"></div>
+    </div>
+
+    <div class="unicas-section">
+        <h3>
+            <i class="fas fa-exclamation-triangle"></i>
+            Extensões Únicas (Apenas 1 máquina)
+            <span class="unicas-badge" id="contadorUnicas">0</span>
+        </h3>
+        <div id="listaUnicas"></div>
     </div>
 
     <!-- FOOTER / ASSINATURA -->
@@ -418,6 +497,7 @@ if (Test-Path $templateHtml) {
 <script>
     var dadosExtensoes = DADOS_AQUI;
 
+    // ===== HELPERS =====
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
         var div = document.createElement('div');
@@ -425,12 +505,27 @@ if (Test-Path $templateHtml) {
         return div.innerHTML;
     }
 
-    function renderizarTabela() {
-        var search = document.getElementById('searchInput').value.toLowerCase().trim();
-        var tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
+    function linkAnalise(id) {
+        return id ? 'https://extensionshield.com/scan/results/' + encodeURIComponent(id) : '#';
+    }
 
-        var filtrados = dadosExtensoes.filter(function(d) {
+    function botaoAnalise(id) {
+        if (!id) return '<span style="color:#94a3b8;font-size:11px;">&mdash;</span>';
+        return '<a href="' + linkAnalise(id) + '" target="_blank" rel="noopener noreferrer" class="btn-analise" title="Analisar no ExtensionShield"><i class="fas fa-shield-alt"></i>Analisar</a>';
+    }
+
+    // ===== ESTADO DA PAGINAÇÃO =====
+    var paginaAtual = 1;
+    var porPagina = 50;
+    var dadosFiltrados = [];
+
+    // ===== TABELA COM PAGINAÇÃO =====
+    function renderizarTabela(resetPagina) {
+        if (resetPagina !== false) paginaAtual = 1;
+
+        var search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+        dadosFiltrados = dadosExtensoes.filter(function(d) {
             if (!search) return true;
             return (d.Computer && d.Computer.toLowerCase().indexOf(search) !== -1) ||
                    (d.User && d.User.toLowerCase().indexOf(search) !== -1) ||
@@ -438,21 +533,25 @@ if (Test-Path $templateHtml) {
                    (d.ID && d.ID.toLowerCase().indexOf(search) !== -1);
         });
 
-        if (filtrados.length === 0) {
+        var tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        if (dadosFiltrados.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#94a3b8;">Nenhum resultado encontrado</td></tr>';
+            document.getElementById('pagination').innerHTML = '';
             return;
         }
 
-        var limite = filtrados.slice(0, 500);
+        var totalPaginas = Math.ceil(dadosFiltrados.length / porPagina);
+        if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+        if (paginaAtual < 1) paginaAtual = 1;
+
+        var inicio = (paginaAtual - 1) * porPagina;
+        var paginaDados = dadosFiltrados.slice(inicio, inicio + porPagina);
+
         var html = '';
-
-        limite.forEach(function(d) {
+        paginaDados.forEach(function(d) {
             var id = escapeHtml(d.ID || '');
-            var linkAnalise = id ? 'https://extensionshield.com/scan/results/' + encodeURIComponent(id) : '#';
-            var btnHtml = id
-                ? '<a href="' + linkAnalise + '" target="_blank" rel="noopener noreferrer" class="btn-analise" title="Analisar no ExtensionShield"><i class="fas fa-shield-alt"></i>Analisar</a>'
-                : '<span style="color:#94a3b8;font-size:11px;">&mdash;</span>';
-
             html += '<tr>'
                 + '<td>' + escapeHtml(d.Computer) + '</td>'
                 + '<td>' + escapeHtml(d.User) + '</td>'
@@ -460,17 +559,60 @@ if (Test-Path $templateHtml) {
                 + '<td><span class="ext-name">' + escapeHtml(d.Extension) + '</span></td>'
                 + '<td><span class="ext-id">' + (id || 'N/A') + '</span></td>'
                 + '<td>' + (d.Version ? '<span class="version-badge">' + escapeHtml(d.Version) + '</span>' : '<span style="color:#94a3b8;">N/A</span>') + '</td>'
-                + '<td>' + btnHtml + '</td>'
+                + '<td>' + botaoAnalise(id) + '</td>'
                 + '</tr>';
         });
 
         tbody.innerHTML = html;
-
-        if (filtrados.length > 500) {
-            tbody.innerHTML += '<tr><td colspan="7" style="text-align:center;padding:16px;color:#f59e0b;font-size:12px;font-weight:600;">Mostrando 500 de ' + filtrados.length + ' resultados. Refine sua pesquisa para ver mais.</td></tr>';
-        }
+        renderizarPaginacao(totalPaginas);
     }
 
+    function renderizarPaginacao(totalPaginas) {
+        var container = document.getElementById('pagination');
+        if (totalPaginas <= 1) { container.innerHTML = ''; return; }
+
+        var html = '';
+        html += '<button ' + (paginaAtual === 1 ? 'disabled' : '') + ' onclick="irParaPagina(' + (paginaAtual - 1) + ')"><i class="fas fa-chevron-left"></i></button>';
+
+        var paginas = [];
+        var maxVisiveis = 7;
+
+        if (totalPaginas <= maxVisiveis) {
+            for (var i = 1; i <= totalPaginas; i++) paginas.push(i);
+        } else {
+            paginas.push(1);
+            var inicio = Math.max(2, paginaAtual - 2);
+            var fim = Math.min(totalPaginas - 1, paginaAtual + 2);
+            if (inicio > 2) paginas.push('...');
+            for (var i = inicio; i <= fim; i++) paginas.push(i);
+            if (fim < totalPaginas - 1) paginas.push('...');
+            paginas.push(totalPaginas);
+        }
+
+        paginas.forEach(function(p) {
+            if (p === '...') {
+                html += '<span class="pagination-ellipsis">...</span>';
+            } else {
+                html += '<button class="' + (p === paginaAtual ? 'active' : '') + '" onclick="irParaPagina(' + p + ')">' + p + '</button>';
+            }
+        });
+
+        html += '<button ' + (paginaAtual === totalPaginas ? 'disabled' : '') + ' onclick="irParaPagina(' + (paginaAtual + 1) + ')"><i class="fas fa-chevron-right"></i></button>';
+
+        var inicio = (paginaAtual - 1) * porPagina + 1;
+        var fim = Math.min(paginaAtual * porPagina, dadosFiltrados.length);
+        html += '<span class="pagination-info">' + inicio + '–' + fim + ' de ' + dadosFiltrados.length + '</span>';
+
+        container.innerHTML = html;
+    }
+
+    function irParaPagina(p) {
+        paginaAtual = p;
+        renderizarTabela(false);
+        document.querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ===== RANKING TOP 15 =====
     function renderizarRanking() {
         var contagem = {};
         dadosExtensoes.forEach(function(d) {
@@ -500,6 +642,53 @@ if (Test-Path $templateHtml) {
         }).join('');
     }
 
+    // ===== EXTENSÕES ÚNICAS =====
+    function renderizarUnicas() {
+        var contagem = {};
+        dadosExtensoes.forEach(function(d) {
+            var nome = d.Extension || 'Desconhecida';
+            contagem[nome] = (contagem[nome] || 0) + 1;
+        });
+
+        var unicas = [];
+        Object.keys(contagem).forEach(function(nome) {
+            if (contagem[nome] === 1) {
+                var reg = dadosExtensoes.find(function(d) {
+                    return (d.Extension || 'Desconhecida') === nome;
+                });
+                unicas.push({
+                    nome: nome,
+                    maquina: reg ? reg.Computer : 'N/A',
+                    id: reg ? reg.ID : ''
+                });
+            }
+        });
+
+        unicas.sort(function(a, b) { return a.nome.localeCompare(b.nome); });
+
+        document.getElementById('contadorUnicas').textContent = unicas.length;
+
+        var container = document.getElementById('listaUnicas');
+
+        if (unicas.length === 0) {
+            container.innerHTML = '<div class="unicas-empty"><i class="fas fa-check-circle" style="color:#10b981;margin-right:6px;"></i>Nenhuma extensão única encontrada</div>';
+            return;
+        }
+
+        container.innerHTML = unicas.map(function(u) {
+            var id = escapeHtml(u.id || '');
+            return '<div class="unica-item">'
+                + '<div class="unica-icon"><i class="fas fa-puzzle-piece"></i></div>'
+                + '<div class="unica-info">'
+                +   '<span class="unica-nome">' + escapeHtml(u.nome) + '</span>'
+                +   '<span class="unica-maquina"><i class="fas fa-desktop"></i> ' + escapeHtml(u.maquina) + '</span>'
+                + '</div>'
+                + '<div class="unica-analise">' + botaoAnalise(id) + '</div>'
+                + '</div>';
+        }).join('');
+    }
+
+    // ===== ESTATÍSTICAS =====
     document.getElementById('statComputadores').textContent = new Set(dadosExtensoes.map(function(d){return d.Computer;}).filter(Boolean)).size;
     document.getElementById('statUsuarios').textContent    = new Set(dadosExtensoes.map(function(d){return d.User;}).filter(Boolean)).size;
     document.getElementById('statExtensoes').textContent   = new Set(dadosExtensoes.map(function(d){return d.ID;}).filter(Boolean)).size;
@@ -507,8 +696,10 @@ if (Test-Path $templateHtml) {
     document.getElementById('dataAtualizacao').textContent = new Date().toLocaleString('pt-BR');
     document.getElementById('anoAtual').textContent = new Date().getFullYear();
 
-    renderizarTabela();
+    // ===== INICIALIZAÇÃO =====
+    renderizarTabela(true);
     renderizarRanking();
+    renderizarUnicas();
 </script>
 </body>
 </html>
