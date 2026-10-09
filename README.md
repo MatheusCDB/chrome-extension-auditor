@@ -73,8 +73,6 @@ Um pipeline em 3 camadas:
 ✅ Exportação para CSV direto do navegador
 ✅ Geração automática ao final da consolidação
 
----
-
 ## Estrutura do repositório
 
 | Caminho | Descrição |
